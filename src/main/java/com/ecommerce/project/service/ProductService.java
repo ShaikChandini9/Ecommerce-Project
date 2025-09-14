@@ -11,4 +11,5 @@ public interface ProductService {
     ProductResponse addStock(Long productId, int addQty);
     ProductResponse get(Long id);
     List<ProductResponse> list();
+    void deleteProduct(Long productId);
 }
