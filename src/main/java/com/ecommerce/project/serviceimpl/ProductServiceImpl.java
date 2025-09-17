@@ -27,19 +27,19 @@ public class ProductServiceImpl implements ProductService {
     private final WishlistRepository wishlistRepo;
 
     @Override
-    public ProductResponse create(ProductRequest r) {
-        Product p = Product.builder()
-                .title(r.getTitle()).description(r.getDescription())
-                .price(r.getPrice()).quantity(r.getQuantity())
+    public ProductResponse create(ProductRequest request) {
+        Product product = Product.builder()
+                .title(request.getTitle()).description(request.getDescription())
+                .price(request.getPrice()).quantity(request.getQuantity())
                 .build();
-        return mapResponse(repo.save(p));
+        return mapResponse(repo.save(product));
     }
 
     @Override
     public ProductResponse addStock(Long productId, int addQty) {
-        Product p = repo.findById(productId).orElseThrow(() -> new NoSuchElementException("Product not found"));
-        p.setQuantity(p.getQuantity() + addQty);
-        return mapResponse(repo.save(p));
+        Product product = repo.findById(productId).orElseThrow(() -> new NoSuchElementException("Product not found"));
+        product.setQuantity(product.getQuantity() + addQty);
+        return mapResponse(repo.save(product));
     }
 
     @Override
@@ -73,10 +73,10 @@ public class ProductServiceImpl implements ProductService {
         repo.delete(product);
     }
 
-    private ProductResponse mapResponse(Product p) {
+    private ProductResponse mapResponse(Product product) {
         return ProductResponse.builder()
-                .id(p.getId()).title(p.getTitle()).description(p.getDescription())
-                .price(p.getPrice()).quantity(p.getQuantity()).build();
+                .id(product.getId()).title(product.getTitle()).description(product.getDescription())
+                .price(product.getPrice()).quantity(product.getQuantity()).build();
     }
 
 }

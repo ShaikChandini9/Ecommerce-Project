@@ -17,13 +17,13 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping("/create")
-    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest req) {
-        return ResponseEntity.ok(service.create(req));
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
+        return ResponseEntity.ok(service.create(request));
     }
 
     @PutMapping("/add-stock/{id}")
-    public ResponseEntity<ProductResponse> addStock(@PathVariable Long id, @Valid @RequestBody StockUpdateRequest req) {
-        return ResponseEntity.ok(service.addStock(id, req.getAddQuantity()));
+    public ResponseEntity<ProductResponse> addStock(@PathVariable Long id, @Valid @RequestBody StockUpdateRequest stockrequest) {
+        return ResponseEntity.ok(service.addStock(id, stockrequest.getAddQuantity()));
     }
 
     @GetMapping("/get-by-id/{id}")

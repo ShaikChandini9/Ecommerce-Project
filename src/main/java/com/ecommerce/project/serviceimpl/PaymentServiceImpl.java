@@ -25,8 +25,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderRepository orderRepo;
 
     @Override
-    public PaymentResponse pay(PaymentRequest r) {
-        Order order = orderRepo.findById(r.getOrderId())
+    public PaymentResponse pay(PaymentRequest request) {
+        Order order = orderRepo.findById(request.getOrderId())
                 .orElseThrow(() -> new NoSuchElementException("Order not found"));
 
         if (order.getStatus() == OrderStatus.CANCELLED) {
@@ -35,29 +35,29 @@ public class PaymentServiceImpl implements PaymentService {
 
         Double orderTotal = order.getTotalAmount();
 
-        if (r.getAmount() == null || !r.getAmount().equals(orderTotal)) {
+        if (request.getAmount() == null || !request.getAmount().equals(orderTotal)) {
             throw new IllegalArgumentException("Payment failed: Must pay the full order amount (" + orderTotal + ")");
         }
 
-        Payment p = Payment.builder()
+        Payment product = Payment.builder()
                 .order(order)
-                .mode(r.getMode())
+                .mode(request.getMode())
                 .amount(orderTotal) // always trust server-side total
                 .confirmationCode(generateConfirmationCode(order.getId()))
                 .status(PaymentStatus.CONFIRMED)
                 .build();
 
         order.setStatus(OrderStatus.PAID);
-        p = paymentRepo.save(p);
+        product = paymentRepo.save(product);
 
         return PaymentResponse.builder()
-                .id(p.getId())
+                .id(product.getId())
                 .orderId(order.getId())
-                .mode(p.getMode().name())
-                .status(p.getStatus().name())
-                .confirmationCode(p.getConfirmationCode())
-                .amount(p.getAmount())
-                .createdAt(p.getCreatedAt())
+                .mode(product.getMode().name())
+                .status(product.getStatus().name())
+                .confirmationCode(product.getConfirmationCode())
+                .amount(product.getAmount())
+                .createdAt(product.getCreatedAt())
                 .build();
     }
 

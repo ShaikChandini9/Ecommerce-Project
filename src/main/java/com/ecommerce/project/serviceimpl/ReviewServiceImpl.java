@@ -25,19 +25,19 @@ public class ReviewServiceImpl implements ReviewService {
     private final ProductRepository productRepo;
 
     @Override
-    public ReviewResponse create(ReviewRequest r) {
-        Customer c = customerRepo.findById(r.getCustomerId()).orElseThrow(()
+    public ReviewResponse create(ReviewRequest request) {
+        Customer customer = customerRepo.findById(request.getCustomerId()).orElseThrow(()
                 -> new NoSuchElementException("Customer not found"));
-        Product p = productRepo.findById(r.getProductId()).orElseThrow(()
+        Product product = productRepo.findById(request.getProductId()).orElseThrow(()
                 -> new NoSuchElementException("Product not found"));
 
         Review review = Review.builder()
-                .customer(c).product(p).rating(r.getRating()).comment(r.getComment())
+                .customer(customer).product(product).rating(request.getRating()).comment(request.getComment())
                 .build();
 
         review = reviewRepo.save(review);
         return ReviewResponse.builder()
-                .id(review.getId()).customerId(c.getId()).productId(p.getId())
+                .id(review.getId()).customerId(customer.getId()).productId(product.getId())
                 .rating(review.getRating()).comment(review.getComment())
                 .build();
     }

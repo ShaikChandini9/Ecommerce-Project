@@ -20,34 +20,34 @@ public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository repo;
 
     @Override
-    public CustomerResponse create(CustomerRequest r) {
-        return repo.findByEmail(r.getEmail())
+    public CustomerResponse create(CustomerRequest request) {
+        return repo.findByEmail(request.getEmail())
                 .<CustomerResponse>map(x -> {
                     throw new IllegalStateException("Email already registered");
                 })
                 .orElseGet(() -> {
-                    Customer c = Customer.builder()
-                            .name(r.getName()).email(r.getEmail()).phone(r.getPhone())
-                            .addressLine1(r.getAddressLine1()).addressLine2(r.getAddressLine2())
-                            .city(r.getCity()).state(r.getState()).postalCode(r.getPostalCode())
+                    Customer customer = Customer.builder()
+                            .name(request.getName()).email(request.getEmail()).phone(request.getPhone())
+                            .addressLine1(request.getAddressLine1()).addressLine2(request.getAddressLine2())
+                            .city(request.getCity()).state(request.getState()).postalCode(request.getPostalCode())
                             .build();
-                    return mapResponse(repo.save(c));
+                    return mapResponse(repo.save(customer));
                 });
     }
 
 
     @Override
-    public CustomerResponse update(Long id, CustomerRequest r) {
+    public CustomerResponse update(Long id, CustomerRequest customerRequest) {
         return repo.findById(id)
-                .map(c -> {
-                    c.setName(r.getName());
-                    c.setPhone(r.getPhone());
-                    c.setAddressLine1(r.getAddressLine1());
-                    c.setAddressLine2(r.getAddressLine2());
-                    c.setCity(r.getCity());
-                    c.setState(r.getState());
-                    c.setPostalCode(r.getPostalCode());
-                    return mapResponse(repo.save(c));
+                .map(customer -> {
+                    customer.setName(customerRequest.getName());
+                    customer.setPhone(customerRequest.getPhone());
+                    customer.setAddressLine1(customerRequest.getAddressLine1());
+                    customer.setAddressLine2(customerRequest.getAddressLine2());
+                    customer.setCity(customerRequest.getCity());
+                    customer.setState(customerRequest.getState());
+                    customer.setPostalCode(customerRequest.getPostalCode());
+                    return mapResponse(repo.save(customer));
                 })
                 .orElseThrow(() -> new NoSuchElementException("Customer not found"));
     }
@@ -71,11 +71,11 @@ public class CustomerServiceImpl implements CustomerService {
         repo.deleteById(id);
     }
 
-    private CustomerResponse mapResponse(Customer c) {
+    private CustomerResponse mapResponse(Customer customer) {
         return CustomerResponse.builder()
-                .id(c.getId()).name(c.getName()).email(c.getEmail()).phone(c.getPhone())
-                .addressLine1(c.getAddressLine1()).addressLine2(c.getAddressLine2())
-                .city(c.getCity()).state(c.getState()).postalCode(c.getPostalCode())
+                .id(customer.getId()).name(customer.getName()).email(customer.getEmail()).phone(customer.getPhone())
+                .addressLine1(customer.getAddressLine1()).addressLine2(customer.getAddressLine2())
+                .city(customer.getCity()).state(customer.getState()).postalCode(customer.getPostalCode())
                 .build();
     }
 

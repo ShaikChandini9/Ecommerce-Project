@@ -16,7 +16,7 @@ public class ReviewController {
     private final ReviewService service;
 
     @PostMapping("/create")
-    public ResponseEntity<ReviewResponse> create(@Valid @RequestBody ReviewRequest req) {
-        return ResponseEntity.ok(service.create(req));
+    public ResponseEntity<ReviewResponse> create(@Valid @RequestBody ReviewRequest request) {
+        return ResponseEntity.ok(service.create(request));
     }
 }

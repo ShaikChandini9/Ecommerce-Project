@@ -29,44 +29,44 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public OrderResponse create(OrderCreateRequest r) {
-        Customer customer = customerRepo.findById(r.getCustomerId())
+    public OrderResponse create(OrderCreateRequest request) {
+        Customer customer = customerRepo.findById(request.getCustomerId())
                 .orElseThrow(() -> new NoSuchElementException("Customer not found"));
 
         Order order = Order.builder()
                 .customer(customer)
-                .shippingAddressLine1(r.getShippingAddressLine1())
-                .shippingAddressLine2(r.getShippingAddressLine2())
-                .shippingCity(r.getShippingCity())
-                .shippingState(r.getShippingState())
-                .shippingPostalCode(r.getShippingPostalCode())
+                .shippingAddressLine1(request.getShippingAddressLine1())
+                .shippingAddressLine2(request.getShippingAddressLine2())
+                .shippingCity(request.getShippingCity())
+                .shippingState(request.getShippingState())
+                .shippingPostalCode(request.getShippingPostalCode())
                 .status(OrderStatus.NEW)
                 .build();
 
         double total = 0.0;
         List<OrderItem> items = new ArrayList<>();
 
-        for (OrderCreateRequest.Item it : r.getItems()) {
-            Product p = productRepo.findById(it.getProductId())
-                    .orElseThrow(() -> new NoSuchElementException("Product not found: " + it.getProductId()));
+        for (OrderCreateRequest.Item item : request.getItems()) {
+            Product product = productRepo.findById(item.getProductId())
+                    .orElseThrow(() -> new NoSuchElementException("Product not found: " + item.getProductId()));
 
-            if (p.getQuantity() < it.getQuantity()) {
-                throw new IllegalStateException("Insufficient stock for product: " + p.getTitle());
+            if (product.getQuantity() < item.getQuantity()) {
+                throw new IllegalStateException("Insufficient stock for product: " + product.getTitle());
             }
 
-            p.setQuantity(p.getQuantity() - it.getQuantity());
+            product.setQuantity(product.getQuantity() - item.getQuantity());
 
-            double lineTotal = p.getPrice() * it.getQuantity();
+            double lineTotal = product.getPrice() * item.getQuantity();
 
-            OrderItem oi = OrderItem.builder()
+            OrderItem orderItem = OrderItem.builder()
                     .order(order)
-                    .product(p)
-                    .quantity(it.getQuantity())
-                    .unitPrice(p.getPrice())
+                    .product(product)
+                    .quantity(item.getQuantity())
+                    .unitPrice(product.getPrice())
                     .lineTotal(lineTotal)
                     .build();
 
-            items.add(oi);
+            items.add(orderItem);
             total += lineTotal;
         }
 
@@ -78,31 +78,31 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse cancel(Long orderId) {
-        Order o = orderRepo.findById(orderId).orElseThrow(() -> new NoSuchElementException("Order not found"));
-        if (o.getStatus() == OrderStatus.CANCELLED) return mapResponse(o);
-        if (o.getStatus() == OrderStatus.SHIPPED || o.getStatus() == OrderStatus.DELIVERED) {
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new NoSuchElementException("Order not found"));
+        if (order.getStatus() == OrderStatus.CANCELLED) return mapResponse(order);
+        if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED) {
             throw new IllegalStateException("Cannot cancel shipped or delivered order");
         }
-        for (OrderItem oi : o.getItems()) {
-            Product p = oi.getProduct();
-            p.setQuantity(p.getQuantity() + oi.getQuantity());
+        for (OrderItem orderItem : order.getItems()) {
+            Product p = orderItem.getProduct();
+            p.setQuantity(p.getQuantity() + orderItem.getQuantity());
         }
-        o.setStatus(OrderStatus.CANCELLED);
-        return mapResponse(orderRepo.save(o));
+        order.setStatus(OrderStatus.CANCELLED);
+        return mapResponse(orderRepo.save(order));
     }
 
     @Override
-    public OrderResponse updateShipping(Long orderId, OrderShippingUpdateRequest s) {
-        Order o = orderRepo.findById(orderId).orElseThrow(() -> new NoSuchElementException("Order not found"));
-        if (o.getStatus() == OrderStatus.SHIPPED || o.getStatus() == OrderStatus.DELIVERED) {
+    public OrderResponse updateShipping(Long orderId, OrderShippingUpdateRequest shippingUpdateRequest) {
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new NoSuchElementException("Order not found"));
+        if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED) {
             throw new IllegalStateException("Cannot update shipping after shipment");
         }
-        if (s.getShippingAddressLine1() != null) o.setShippingAddressLine1(s.getShippingAddressLine1());
-        o.setShippingAddressLine2(s.getShippingAddressLine2());
-        o.setShippingCity(s.getShippingCity());
-        o.setShippingState(s.getShippingState());
-        o.setShippingPostalCode(s.getShippingPostalCode());
-        return mapResponse(orderRepo.save(o));
+        if (shippingUpdateRequest.getShippingAddressLine1() != null) order.setShippingAddressLine1(shippingUpdateRequest.getShippingAddressLine1());
+        order.setShippingAddressLine2(shippingUpdateRequest.getShippingAddressLine2());
+        order.setShippingCity(shippingUpdateRequest.getShippingCity());
+        order.setShippingState(shippingUpdateRequest.getShippingState());
+        order.setShippingPostalCode(shippingUpdateRequest.getShippingPostalCode());
+        return mapResponse(orderRepo.save(order));
     }
 
     @Override
@@ -110,24 +110,24 @@ public class OrderServiceImpl implements OrderService {
         return mapResponse(orderRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Order not found")));
     }
 
-    private OrderResponse mapResponse(Order o){
-        var items = o.getItems().stream().map(oi -> OrderResponse.Item.builder()
-                .productId(oi.getProduct().getId())
-                .title(oi.getProduct().getTitle())
-                .quantity(oi.getQuantity())
-                .unitPrice(oi.getUnitPrice())
-                .lineTotal(oi.getLineTotal())
+    private OrderResponse mapResponse(Order order){
+        var items = order.getItems().stream().map(orderItem -> OrderResponse.Item.builder()
+                .productId(orderItem.getProduct().getId())
+                .title(orderItem.getProduct().getTitle())
+                .quantity(orderItem.getQuantity())
+                .unitPrice(orderItem.getUnitPrice())
+                .lineTotal(orderItem.getLineTotal())
                 .build()).toList();
 
         return OrderResponse.builder()
-                .id(o.getId()).status(o.getStatus().name())
-                .customerId(o.getCustomer().getId())
-                .items(items).totalAmount(o.getTotalAmount())
-                .shippingAddressLine1(o.getShippingAddressLine1())
-                .shippingAddressLine2(o.getShippingAddressLine2())
-                .shippingCity(o.getShippingCity())
-                .shippingState(o.getShippingState())
-                .shippingPostalCode(o.getShippingPostalCode())
+                .id(order.getId()).status(order.getStatus().name())
+                .customerId(order.getCustomer().getId())
+                .items(items).totalAmount(order.getTotalAmount())
+                .shippingAddressLine1(order.getShippingAddressLine1())
+                .shippingAddressLine2(order.getShippingAddressLine2())
+                .shippingCity(order.getShippingCity())
+                .shippingState(order.getShippingState())
+                .shippingPostalCode(order.getShippingPostalCode())
                 .build();
     }
 }
