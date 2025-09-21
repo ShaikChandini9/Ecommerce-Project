@@ -1,5 +1,5 @@
 
-# 🛍️ E-Commerce Backend – Spring Boot REST API
+# 🛍️ E-Commerce Backend Project
 
 **A modern, scalable, and production-ready backend for a complete e-commerce platform.**  
 Built using **Spring Boot**, this backend provides a set of **clean, secure, and well-structured APIs** for managing everything from **products, orders, and payments** to **wishlists, reviews, and customers**.
