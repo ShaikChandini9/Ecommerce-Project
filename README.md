@@ -273,27 +273,3 @@ This project demonstrates how to build a **real-world e-commerce backend** that 
 | Payments           | One-to-one order mapping, unique confirmation codes |
 | Reviews            | Unique constraints, cascade deletion |
 | Data Integrity     | Validation, business rules, and transaction safety |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!  
-- Report bugs  
-- Suggest features  
-- Submit pull requests  
-
-Simply fork the repository and open a PR to help improve the project.
-
----
-
-## 🌟 Final Thoughts
-
-This isn’t just a sample project — it’s a **professional-grade backend** demonstrating modern development practices, transactional safety, and a clear domain model.  
-
-It’s perfect for:
-- **Portfolio projects** to impress employers
-- **Learning Spring Boot** and real-world backend design
-- Serving as the **foundation of a production e-commerce platform**
-
-If you find it useful, don’t forget to ⭐ the repository and share it with others!
